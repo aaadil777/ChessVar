@@ -27,7 +27,7 @@ class ChessVar:
         refreshes the board after verifying the move's validity. The game condition might alter if a king
         moves up to the eighth row. It will switch the player's turn after a move. Ensures pawn moves first
         """
-         piece = self.board.get_piece(start)
+        piece = self.board.get_piece(start)
         if not piece:
             raise ValueError("No piece at the starting square.")
         if not self.first_move_done:

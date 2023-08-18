@@ -5,8 +5,7 @@
 
 class ChessVar:
     """
-    Set the starting game state to UNFINISHED and initialize the board with the player whose turn it
-    is.
+    Sets players turn and directs the game to UNFINISHED status.
     """
     def __init__(self):
         """
@@ -40,9 +39,7 @@ class ChessVar:
         return True
     def __is_valid_move(self, from_square, to_square):
         """
-        Verify the move's validity by checking that:
-        - The move is valid based on the piece's permitted moves; correct player's turn
-        - Does not reveal one's own king for check; same applies for the opponent's king
+        Verify the move's validity by checking that move is valid based on chess game logic, does not reveal one's king and the opponent's king
         """
         piece = self.board.get_piece(from_square)
         if not piece or piece.color != self.current_turn:
@@ -53,7 +50,7 @@ class ChessVar:
     def __update_game_state(self):
         """
         Check the board for any situations that might discontinue the game, such a king landing on the
-        eighth row.
+        eighth row
         """
         white_king_pos, black_king_pos = self.board.get_king_positions()
         if white_king_pos[1] == 7:
@@ -75,8 +72,7 @@ class Board:
         Initialize the board to its starting position.
         """
         self.board = [[None for _ in range(8)] for _ in range(8)]
-          def move_piece(self, from_square, to_square):
-        # Assume pieces are moved only after verifying the move is valid.
+    def move_piece(self, from_square, to_square):
         start_row, start_col = GameUtils.notation_to_index(from_square)
         end_row, end_col = GameUtils.notation_to_index(to_square)
         self.board[end_row][end_col] = self.board[start_row][start_col]
@@ -100,6 +96,16 @@ class Board:
         Remove a piece from the specified location.
         """
         self.board[row][col] = None
+
+    def knock_down_piece(self, piece):
+        """
+        Handles a piece that has been captured
+        """
+        piece = self.game_board.get_piece(square)
+        if piece:
+            self.captured_pieces.append(piece)
+            row, col = GameUtils.notation_to_index(square)
+            self.game_board.remove_piece(row, col)
 
     def display(self):
         """
@@ -328,50 +334,3 @@ class GameUtils:
         Check if the given square is under attack by the specified color.
         """
         pass
-
-class BoardManager:
-    """
-    Manages in-game changes to board movement based on actions between players
-    """
-    def __init__(self):
-        self.game_board = GameBoard()
-
-    def move_piece(self, start_row, start_col, end_row, end_col):
-        """
-        Move a piece from the starting position to the ending position.
-        If there's an opponent's piece on the ending square, it will be captured.
-        """
-        piece_to_move = self.game_board.get_piece(start_row, start_col)
-
-        if not piece_to_move:
-            return False
-
-        target_piece = self.game_board.get_piece(end_row, end_col)
-        if target_piece:
-            if target_piece.color == piece_to_move.color:
-                return False
-            else:
-                self.knock_down_piece(target_piece)
-        self.game_board.remove_piece(start_row, start_col)
-        self.game_board.place_piece(piece_to_move, end_row, end_col)
-        return True
-    def knock_down_piece(self, piece):
-        """
-        Handles a piece that has been captured
-        """
-        piece = self.game_board.get_piece(square)
-        if piece:
-            self.captured_pieces.append(piece)
-            row, col = GameUtils.notation_to_index(square)
-            self.game_board.remove_piece(row, col)
-    def display_board(self):
-        """
-        Display the current state of the board.
-        """
-        for row in self.game_board.board:
-            display_row = []
-            for piece in row:
-                if piece:
-                    display_row.append(f"{piece.color[0]}{piece.type[0]}")
-                else:
-                    display_row.append("--")

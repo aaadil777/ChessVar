@@ -40,7 +40,7 @@ class ChessVar:
             return False
         if not self.__is_valid_move(from_square, to_square):
             return False
-         if piece.type == 'king' and end[0] == 7:  # Assuming the board rows are 0-indexed
+         if piece.type == 'king' and end[0] == 7:
             return "King has reached the 8th row. Game won by " + piece.color + "!"
         self.board.move_piece(from_square, to_square)
         self.moves_made += 1

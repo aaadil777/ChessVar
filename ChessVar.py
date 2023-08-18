@@ -107,20 +107,6 @@ class Board:
             row, col = GameUtils.notation_to_index(square)
             self.game_board.remove_piece(row, col)
 
-    def display(self):
-        """
-        Display the board in a rudimentary manner.
-        For this example, we'll just use the first letter of each piece's type
-        and its color to represent it. Empty squares will be shown as "--".
-        """
-        for row in self.board:
-            display_row = []
-            for piece in row:
-                if piece:
-                    display_row.append(f"{piece.color[0]}{piece.type[0]}")
-                else:
-                    display_row.append("--")
-
     def is_king_in_check(self, color):
         """
         determines if a king (identified by color) is in check by inspecting the board.

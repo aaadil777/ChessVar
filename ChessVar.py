@@ -15,6 +15,8 @@ class ChessVar:
         self.current_turn = "white"
         self.game_state = "UNFINISHED"
         self.first_move_done = False
+        self.moves_made = 0
+        self.board = Board()
     def get_game_state(self):
         """
         gives the game's current state back. seeks out the winning criteria on the board.
@@ -25,15 +27,23 @@ class ChessVar:
         refreshes the board after verifying the move's validity. The game condition might alter if a king
         moves up to the eighth row. It will switch the player's turn after a move. Ensures pawn moves first
         """
+         piece = self.board.get_piece(start)
+        if not piece:
+            raise ValueError("No piece at the starting square.")
         if not self.first_move_done:
             piece = self.board.get_piece(from_square)
             if not isinstance(piece, Pawn):
                 return False
+        if not piece.is_valid_move(start, end):
+            raise ValueError("Invalid move for the piece.")
         if self.game_state != "UNFINISHED":
             return False
         if not self.__is_valid_move(from_square, to_square):
             return False
+         if piece.type == 'king' and end[0] == 7:  # Assuming the board rows are 0-indexed
+            return "King has reached the 8th row. Game won by " + piece.color + "!"
         self.board.move_piece(from_square, to_square)
+        self.moves_made += 1
         self.__toggle_turn()
         self.__update_game_state()
         return True
@@ -62,6 +72,19 @@ class ChessVar:
         Switches the turn from white to black or vice versa.
         """
         self.current_turn = "black" if self.current_turn == "white" else "white"
+    def make_move(self, start, end):
+        """
+        makes new move toggle
+        """
+        piece = self.board.get_piece(start)
+        
+        if not piece:
+            raise ValueError("No piece at the starting square.")
+        
+        if self.moves_made == 0 and piece.type != 'pawn':
+            raise ValueError("The first move of the game must be made by a pawn.")
+        
+        self.moves_made += 1
 
 class Board:
     """
@@ -87,9 +110,8 @@ class Board:
         Get the piece present at the specified location.
         Returns None if no piece is present.
         """
-        def get_piece(self, square):
-            row, col = GameUtils.notation_to_index(square)
-            return self.board[row][col]
+        row, col = GameUtils.notation_to_index(square)
+        return self.board[row][col]
 
     def remove_piece(self, row, col):
         """
@@ -177,6 +199,23 @@ class Board:
                     display_row.append(f"{piece.color[0]}{piece.type[0]}")
                 else:
                     display_row.append("--")
+class Piece:
+    """
+    Base class for all chess pieces.
+    """
+    def __init__(self, color, piece_type):
+        """
+        Initialize a chess piece with a color (white or black) and type (e.g., 'pawn', 'rook', etc.).
+        """
+        self.color = color
+        self.type = piece_type
+
+    def valid_moves(self, position):
+        """
+        Method to get all valid moves for a piece from a given position.
+        """
+        raise NotImplementedError("valid_moves() must be defined in subclasses.")
+
 class King(Piece):
     def valid_moves(self, position):
         """
@@ -316,7 +355,24 @@ class GameUtils:
         return chr(col + ord('a')) + str(8 - row)
     @staticmethod
     def is_square_under_attack(board, square, attacking_color):
+        class GameUtils:
+    @staticmethod
+    def is_square_under_attack(board, square, attacking_color):
         """
-        Check if the given square is under attack by the specified color.
+        Check if a given square is under attack by pieces of a given color.
+
+        :param board: An instance of the Board class.
+        :param square: A tuple (row, col) representing the square in question.
+        :param attacking_color: The color of the potentially attacking pieces (e.g. 'white' or 'black').
+        :return: True if the square is under attack, False otherwise.
         """
-        pass
+
+        for row in range(8):  # Assuming an 8x8 board
+            for col in range(8):
+                piece = board.get_piece((row, col))
+                if piece and piece.color == attacking_color:
+                    if square in piece.get_legal_moves(board):
+                        return True
+
+        return False
+
